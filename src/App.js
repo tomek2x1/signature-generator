@@ -119,9 +119,8 @@ const App = () => {
 
     const validationFormResult = validationForm(data);
     if(validationFormResult){
-      console.log("wysłano dane");
-
-      fetch('api/createsignature', {
+      
+      fetch('http://localhost:3001/api/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

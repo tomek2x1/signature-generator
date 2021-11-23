@@ -1,5 +1,8 @@
 import './App.css';
 import { useState } from 'react';
+import axios from 'axios';
+import fileDownload from 'js-file-download';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import InputLabel from '@mui/material/InputLabel';
@@ -36,6 +39,10 @@ const Form = styled("form")({
   marginRight:30,
 });
 
+const InputFile = styled(TextField)({ 
+  marginTop:15,
+});
+
 const App = () => {
   const [data, setData] = useState({
     name:"",
@@ -44,6 +51,8 @@ const App = () => {
     email:"",
     workplace:"",
   })
+
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const [validation, setValidation] = useState({
     name:"",
@@ -66,7 +75,6 @@ const App = () => {
   }
 
   const validationForm = (objToValid) => {
-    console.log("validacja")
     const localState = {
       name:"",
       position:"",
@@ -119,24 +127,54 @@ const App = () => {
 
     const validationFormResult = validationForm(data);
     if(validationFormResult){
-      
-      fetch('http://localhost:3001/api/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+      const userFiles = document.querySelector("#file");
+
+      const form = new FormData();
+      form.append('name', data.name);
+      form.append('position', data.position);
+      form.append('phone', data.phone);
+      form.append('email', data.email);
+      form.append('workplace', data.workplace);
+      // if(selectedFile){
+        form.append('picture', userFiles.files[0]);
+      // }
+
+      axios({
+        method: "post",
+        url: "http://localhost:3001/api/create",
+        data: form,
+      }).then(function (response) {
+          // handle success
+          console.log(response);
+          if(response.status === 200){
+            downloadFile();
+          }
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        });
       
     }
   }
+
+const downloadFile = () => {
+  axios({
+    method: "get",
+    url: "http://localhost:3001/api/create",
+    responseType: 'blob',
+  }).then(function (response) {
+    const type = response.headers['content-type']
+    const blob = new Blob([response.data], { type: type, encoding: 'UTF-8' })
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    link.download = 'signature.html'
+    link.click()
+  }).catch(function (error) {
+    // handle error
+    console.log(error);
+  });
+}
 
   return (
     <div className="App">
@@ -163,6 +201,9 @@ const App = () => {
                 {workspace}
               </Select>
             </SelectFormControl>
+            <InputFile type="file" id="file" name="file" value={data.file} label="Wyślij swoje zdjęcie" fullWidth margin="dense" size="small" onChange={(e) => setSelectedFile(e.target.files[0])} InputLabelProps={{
+            shrink: true,
+          }}/>
             <MyButton variant="contained" endIcon={<SendIcon />} onClick={e => handleSubmit(e)}>
               Generuj
             </MyButton>

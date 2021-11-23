@@ -45,16 +45,98 @@ const App = () => {
     workplace:"",
   })
 
-  const workplaces = ["Pracownik biurowy", "Salon sprzedaży w Warszawie", "Salon sprzedaży w Krakowie" ,"Salon sprzedaży w Rzeszowie" ,"Salon sprzedaży w Zamościu" ,"Punkt sprzedaży w Gdańsku" ,"Punkt sprzedaży w Poznaniu"];
+  const [validation, setValidation] = useState({
+    name:"",
+    position:"",
+    phone:"",
+    email:"",
+    workplace:"",
+  })
 
-  const workspace = workplaces.map(workplace => {
+  const workplaces = ["Pracownik biurowy w Zamościu", "Salon sprzedaży w Warszawie", "Salon sprzedaży w Krakowie" ,"Salon sprzedaży w Rzeszowie" ,"Salon sprzedaży w Zamościu" ,"Punkt sprzedaży w Gdańsku" ,"Punkt sprzedaży w Poznaniu"];
+
+  const workspace = workplaces.map((workplace, index) => {
     return(
-      <MenuItem value={workplace}>{workplace}</MenuItem>
+      <MenuItem key={index} value={workplace}>{workplace}</MenuItem>
     )
   })
 
   const handleChange = (e) => {
     setData({...data, [e.target.name]: e.target.value});
+  }
+
+  const validationForm = (objToValid) => {
+    console.log("validacja")
+    const localState = {
+      name:"",
+      position:"",
+      phone:"",
+      email:"",
+      workplace:"",
+    }
+    if(objToValid.name == ""){
+      localState.name = "Podaj imię i nazwisko";
+    } else {
+      localState.name = "";
+    }
+
+    if(objToValid.position == ""){
+      localState.position = "Podaj nazwę stanowiska";
+    } else {
+      localState.position = "";
+    }
+
+    const phoneRegex = /(?<!\w)(\(?(\+|00)?48\)?)?[ -]?\d{3}[ -]?\d{3}[ -]?\d{3}(?!\w)/g
+    if(objToValid.phone.match(phoneRegex)){
+      localState.phone = "";
+    } else {
+      localState.phone = "Podaj numer telefonu";
+    }
+
+    const emailRegex = /^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i;
+    if(objToValid.email.match(emailRegex)){
+      localState.email = "";
+    } else {
+      localState.email = "Podaj poprawny adres email";
+    }
+
+    if(objToValid.workplace == ""){
+      localState.workplace = "Podaj miejsce pracy";
+    } else {
+      localState.workplace = "";
+    }
+
+    if(localState.name || localState.position || localState.phone || localState.email || localState.workplace){
+      setValidation(localState)
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const validationFormResult = validationForm(data);
+    if(validationFormResult){
+      console.log("wysłano dane");
+
+      fetch('api/createsignature', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+      
+    }
   }
 
   return (
@@ -65,7 +147,7 @@ const App = () => {
           <Form>
             <TextField id="name" name="name" value={data.name} label="Imię i nazwisko" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
             <TextField id="position" name="position" value={data.position} label="Stanowisko" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
-            <TextField id="phone" name="phone" value={data.phone} label="Numer telefonu" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
+            <TextField type="number" id="phone" name="phone" value={data.phone} label="Numer telefonu" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
             <TextField id="email" name="email" value={data.email} label="Adres email" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
             <SelectFormControl fullWidth>
               <InputLabel id="workplace-label" size="small">Miejsce pracy</InputLabel>
@@ -82,7 +164,7 @@ const App = () => {
                 {workspace}
               </Select>
             </SelectFormControl>
-            <MyButton variant="contained" endIcon={<SendIcon />}>
+            <MyButton variant="contained" endIcon={<SendIcon />} onClick={e => handleSubmit(e)}>
               Generuj
             </MyButton>
           </Form>

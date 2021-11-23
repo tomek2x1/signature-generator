@@ -20,10 +20,15 @@ const MyButton = styled(Button)({
 
 const MyCard = styled(Card)({ 
   border: '2px solid transparent',
-  borderRadius:20,
+  borderRadius:10,
   backgroundImage: 'linear-gradient(white, white), radial-gradient(circle at top left, #f07d3b,#ea5036)',
   backgroundOrigin: 'border-box',
   backgroundClip: 'content-box, border-box',
+});
+
+const SelectFormControl = styled(FormControl)({ 
+  marginTop:10,
+  textAlign:'initial'
 });
 
 const Form = styled("form")({ 
@@ -40,7 +45,7 @@ const App = () => {
     workplace:"",
   })
 
-  const workplaces = ["Salon sprzedaży w Warszawie", "Salon sprzedaży w Krakowie" ,"Salon sprzedaży w Rzeszowie" ,"Salon sprzedaży w Zamościu" ,"Punkt sprzedaży w Gdańsku" ,"Punkt sprzedaży w Poznaniu"];
+  const workplaces = ["Pracownik biurowy", "Salon sprzedaży w Warszawie", "Salon sprzedaży w Krakowie" ,"Salon sprzedaży w Rzeszowie" ,"Salon sprzedaży w Zamościu" ,"Punkt sprzedaży w Gdańsku" ,"Punkt sprzedaży w Poznaniu"];
 
   const workspace = workplaces.map(workplace => {
     return(
@@ -62,7 +67,7 @@ const App = () => {
             <TextField id="position" name="position" value={data.position} label="Stanowisko" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
             <TextField id="phone" name="phone" value={data.phone} label="Numer telefonu" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
             <TextField id="email" name="email" value={data.email} label="Adres email" variant="outlined" fullWidth margin="dense" size="small" onChange={e=>handleChange(e)}/>
-            <FormControl fullWidth>
+            <SelectFormControl fullWidth>
               <InputLabel id="workplace-label" size="small">Miejsce pracy</InputLabel>
               <Select
                 labelId="workplace-label"
@@ -76,7 +81,7 @@ const App = () => {
               >
                 {workspace}
               </Select>
-            </FormControl>
+            </SelectFormControl>
             <MyButton variant="contained" endIcon={<SendIcon />}>
               Generuj
             </MyButton>
